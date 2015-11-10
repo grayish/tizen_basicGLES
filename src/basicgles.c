@@ -40,6 +40,7 @@ static Evas_Object* add_win(const char *name)
 {
 	Evas_Object *win;
 
+	// set elm configuration to use GPU acceleration by using opengl
 	elm_config_accel_preference_set("opengl");
 	win = elm_win_util_standard_add(name, "OpenGL example: Cube");
 
