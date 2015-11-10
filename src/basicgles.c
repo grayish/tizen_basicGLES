@@ -1,7 +1,13 @@
 #include "basicgles.h"
 
 
-
+static void
+clicked_cb(void *user_data, Evas_Object *obj, void *event_info)
+{
+	appdata_s *ad = (appdata_s *)user_data;
+	ad->xangle = 45;
+	ad->yangle = 45;
+}
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
@@ -86,6 +92,14 @@ create_base_gui(appdata_s *ad)
 
 	Evas_Object *glview = add_glview(box, ad);
 	elm_box_pack_end(box, glview);
+
+	Evas_Object *button = elm_button_add(box);
+	evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	evas_object_size_hint_align_set(button, EVAS_HINT_FILL, 1);
+	elm_object_text_set(button, "Reset");
+	evas_object_smart_callback_add(button, "clicked", clicked_cb, ad);
+	evas_object_show(button);
+	elm_box_pack_end(box, button);
 
 	// Show the box
 	evas_object_show(box);
