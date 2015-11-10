@@ -2,7 +2,7 @@
 // Created by hobbang5 on 2015-11-10.
 //
 
-#include <basicgles.h>
+#include "gl_texture_util.h"
 
 unsigned int read_texture(Evas_Object *parent, const char *filename) {
 

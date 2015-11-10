@@ -1,12 +1,19 @@
 #include "basicgles.h"
+#include "glview.h"
 
-static void del_anim(void *data, Evas *evas, Evas_Object *obj, void *event_info) {
-    appdata_s *ad = data;
-    ecore_animator_del(ad->ani);
+static void
+del_anim(void *data, Evas *evas, Evas_Object *obj, void *event_info) {
+    appdata_s *ad = (appdata_s *)data;
+
+    if(ad && ad->ani) {
+        ecore_animator_del(ad->ani);
+        ad->ani = NULL;
+    }
 }
 
-static Eina_Bool anim(void *data) {
-    appdata_s *ad = evas_object_data_get(data, "ad");
+static Eina_Bool
+anim_cb(void *data) {
+    appdata_s *ad = (appdata_s *) data;
 
     ad->xangle -= ad->tic_xangle;
     ad->yangle -= ad->tic_yangle;
@@ -18,7 +25,8 @@ static Eina_Bool anim(void *data) {
         ad->reset_anim = EINA_FALSE;
     }
 
-    elm_glview_changed_set(data);
+    // notify the object need to be updated
+    elm_glview_changed_set(ad->glview);
 
     return EINA_TRUE;
 }
@@ -33,7 +41,7 @@ clicked_cb(void *user_data, Evas_Object *obj, void *event_info) {
         ad->tic_xangle = (ad->xangle - 45.0f) / 45.0f;
         ad->tic_yangle = (ad->yangle - 45.0f) / 45.0f;
 
-        ad->ani = ecore_animator_add(anim, ad->glview);
+        ad->ani = ecore_animator_add(anim_cb, ad);
         evas_object_event_callback_add(ad->glview, EVAS_CALLBACK_DEL, del_anim, ad);
     }
 }
@@ -45,12 +53,13 @@ win_delete_request_cb(void *data, Evas_Object *obj, void *event_info) {
 
 static void
 win_back_cb(void *data, Evas_Object *obj, void *event_info) {
-    appdata_s *ad = data;
+    appdata_s *ad = (appdata_s *)data;
     /* Let window go to hide state. */
     elm_win_lower(ad->win);
 }
 
-static void create_indicator(appdata_s *ad) {
+static void
+create_indicator(appdata_s *ad) {
     elm_win_conformant_set(ad->win, EINA_TRUE);
 
     elm_win_indicator_mode_set(ad->win, ELM_WIN_INDICATOR_SHOW);
@@ -62,11 +71,9 @@ static void create_indicator(appdata_s *ad) {
     evas_object_show(ad->conform);
 }
 
-static Evas_Object *add_win(const char *name) {
+static Evas_Object *
+add_win(const char *name) {
     Evas_Object *win;
-
-    // set elm configuration to use GPU acceleration by using opengl
-    elm_config_accel_preference_set("opengl");
     win = elm_win_util_standard_add(name, "OpenGL example: Cube");
 
     if (!win)
@@ -84,9 +91,11 @@ static Evas_Object *add_win(const char *name) {
 
 static bool
 create_base_gui(appdata_s *ad) {
-    /* Window */
-    /* Create and initialize elm_win.
-       elm_win is mandatory to manipulate window. */
+
+    // set elm configuration to use GPU acceleration for opengles
+    elm_config_accel_preference_set("opengl");
+
+    // create & initialize window
     ad->win = add_win(ad->name);
 
     if (!ad->win)
@@ -149,7 +158,7 @@ create_base_gui(appdata_s *ad) {
     // Add the box in the naviframe container
     elm_naviframe_item_push(ad->naviframe, "Basic GLES App", NULL, NULL, table, NULL);
 
-    /* Show window after base gui is set up */
+    // Show window after base gui is set up
     evas_object_show(ad->win);
 
     return true;

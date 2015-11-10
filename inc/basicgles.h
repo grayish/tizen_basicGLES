@@ -1,5 +1,5 @@
-#ifndef __basicgles_H__
-#define __basicgles_H__
+#ifndef __BASICGLES_H__
+#define __BASICGLES_H__
 
 #include <app.h>
 #include <Elementary.h>
@@ -60,11 +60,4 @@ typedef struct appdata {
 	Eina_Bool reset_anim : 1;
 } appdata_s;
 
-// in gl.c
-Evas_Object*
-		add_glview(Evas_Object* parent, appdata_s *ad);
-
-// in gl_tex.c
-unsigned int read_texture(Evas_Object *parent, const char *filename);
-
-#endif /* __basicgles_H__ */
+#endif /* __BASICGLES_H__ */

@@ -3,8 +3,9 @@
 //
 
 
-#include <basicgles.h>
-#include <gl_utils.h>
+#include "basicgles.h"
+#include "gl_texture_util.h"
+#include "gl_utils.h"
 
 ELEMENTARY_GLVIEW_GLOBAL_DEFINE();
 
@@ -193,8 +194,8 @@ static const char fragment_tex_shader[] =
                 "    gl_FragColor = texture2D(u_texSampler, v_tex);\n"
                 "}";
 
-static void init_shaders(Evas_Object *obj) {
-    appdata_s *ad = evas_object_data_get(obj, "ad");
+static void
+init_shader_program(appdata_s* ad) {
     const char *p;
 
     p = vertex_tex_shader;
@@ -238,7 +239,7 @@ static void init_shaders(Evas_Object *obj) {
 
 static void
 mouse_down_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
-    appdata_s *ad = data;
+    appdata_s *ad = (appdata_s *) data;
     if (!ad->reset_anim) {
         ad->mouse_down = EINA_TRUE;
         elm_glview_changed_set(obj);
@@ -260,7 +261,7 @@ static void
 mouse_move_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
     Evas_Event_Mouse_Move *ev;
     ev = (Evas_Event_Mouse_Move *) event_info;
-    appdata_s *ad = data;
+    appdata_s *ad = (appdata_s *) data;
     if (!ad->reset_anim) {
 
         float dx = 0, dy = 0;
@@ -279,25 +280,25 @@ mouse_move_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
 
 static void
 mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
-    appdata_s *ad = data;
+    appdata_s *ad = (appdata_s *) data;
     if (!ad->reset_anim) {
 
         ad->mouse_down = EINA_FALSE;
         elm_glview_changed_set(obj);
     }
-
 }
 
 // GL Init function
-static void init_gl(Evas_Object *glview) {
+static void
+init_glview(Evas_Object *glview) {
     // Set gl state color to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    appdata_s *ad = evas_object_data_get(glview, "ad");
+    appdata_s *ad = (appdata_s *) evas_object_data_get(glview, "ad");
 
     if (!ad->initialized) {
-        init_shaders(glview);
-        ad->texture = read_texture(ad->win, "tizen_noalpha.png");
+        init_shader_program(ad);
+        ad->texture = create_texture(ad->win, "tizen_noalpha.png");
 
         glEnable(GL_DEPTH_TEST);
         ad->initialized = EINA_TRUE;
@@ -308,8 +309,9 @@ static void init_gl(Evas_Object *glview) {
 }
 
 // GLView resize function
-static void resize_gl(Evas_Object *glview) {
-    appdata_s *ad = evas_object_data_get(glview, "ad");
+static void
+resize_glview(Evas_Object *glview) {
+    appdata_s *ad = (appdata_s *) evas_object_data_get(glview, "ad");
 
     int w, h;
     elm_glview_size_get(glview, &w, &h);
@@ -319,9 +321,10 @@ static void resize_gl(Evas_Object *glview) {
 }
 
 // GL draw callback
-static void draw_gl(Evas_Object *glview) {
+static void
+draw_glview(Evas_Object *glview) {
 
-    appdata_s *ad = evas_object_data_get(glview, "ad");
+    appdata_s *ad = (appdata_s *) evas_object_data_get(glview, "ad");
     float model[16], view[16];
     float aspect;
 
@@ -370,8 +373,9 @@ static void draw_gl(Evas_Object *glview) {
 }
 
 // Delete GLView callback
-static void del_gl(Evas_Object *glview) {
-    appdata_s *ad = evas_object_data_get(glview, "ad");
+static void
+del_glview(Evas_Object *glview) {
+    appdata_s *ad = (appdata_s *) evas_object_data_get(glview, "ad");
 
     glDeleteShader(ad->vtx_shader);
     glDeleteShader(ad->fgmt_shader);
@@ -382,24 +386,24 @@ static void del_gl(Evas_Object *glview) {
 
 Evas_Object *
 add_glview(Evas_Object *parent, appdata_s *ad) {
-    Evas_Object *gl;
+    Evas_Object *glview;
 
     /* Create and initialize GLView */
-    gl = elm_glview_add(parent);
-    evas_object_data_set(gl, "ad", ad);
+    glview = elm_glview_add(parent);
+    evas_object_data_set(glview, "ad", ad);
 
-    ELEMENTARY_GLVIEW_GLOBAL_USE(gl);
-    evas_object_size_hint_weight_set(gl, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(gl, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    ELEMENTARY_GLVIEW_GLOBAL_USE(glview);
+    evas_object_size_hint_weight_set(glview, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(glview, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
     /* Request a surface with alpha and a depth buffer */
-    elm_glview_mode_set(gl, ELM_GLVIEW_ALPHA | ELM_GLVIEW_DEPTH);
+    elm_glview_mode_set(glview, ELM_GLVIEW_ALPHA | ELM_GLVIEW_DEPTH);
 
     /* The resize policy tells GLView what to do with the surface when it
      * resizes. ELM_GLVIEW_RESIZE_POLICY_RECREATE will tell it to
      * destroy the current surface and recreate it to the new size.
      */
-    elm_glview_resize_policy_set(gl, ELM_GLVIEW_RESIZE_POLICY_RECREATE);
+    elm_glview_resize_policy_set(glview, ELM_GLVIEW_RESIZE_POLICY_RECREATE);
 
     /* The render policy sets how GLView should render GL code.
      * ELM_GLVIEW_RENDER_POLICY_ON_DEMAND will have the GL callback
@@ -407,37 +411,29 @@ add_glview(Evas_Object *parent, appdata_s *ad) {
      * ELM_GLVIEW_RENDER_POLICY_ALWAYS would cause the callback to be
      * called even if the object were hidden.
      */
-    elm_glview_render_policy_set(gl, ELM_GLVIEW_RENDER_POLICY_ON_DEMAND);
+    elm_glview_render_policy_set(glview, ELM_GLVIEW_RENDER_POLICY_ON_DEMAND);
 
     /* The initialize callback function gets registered here */
-    elm_glview_init_func_set(gl, init_gl);
+    elm_glview_init_func_set(glview, init_glview);
 
     /* The delete callback function gets registered here */
-    elm_glview_del_func_set(gl, del_gl);
+    elm_glview_del_func_set(glview, del_glview);
 
     /* The resize callback function gets registered here */
-    elm_glview_resize_func_set(gl, resize_gl);
+    elm_glview_resize_func_set(glview, resize_glview);
 
     /* The render callback function gets registered here */
-    elm_glview_render_func_set(gl, draw_gl);
+    elm_glview_render_func_set(glview, draw_glview);
 
-    elm_object_focus_set(gl, EINA_TRUE);
+    elm_object_focus_set(glview, EINA_TRUE);
 
-    /* This adds an animator so that the app will regularly
-    * trigger updates of the GLView using elm_glview_changed_set().
-    *
-    * NOTE: If you delete GL, this animator will keep running trying to access
-    * GL so this animator needs to be deleted with ecore_animator_del().
-    */
-
-
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_DOWN, mouse_down_cb, ad);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_UP, mouse_up_cb, ad);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_MOVE, mouse_move_cb, ad);
+    evas_object_event_callback_add(glview, EVAS_CALLBACK_MOUSE_DOWN, mouse_down_cb, ad);
+    evas_object_event_callback_add(glview, EVAS_CALLBACK_MOUSE_UP, mouse_up_cb, ad);
+    evas_object_event_callback_add(glview, EVAS_CALLBACK_MOUSE_MOVE, mouse_move_cb, ad);
 
     /* Add the GLView to the parent and show it */
-    elm_object_content_set(parent, gl);
-    evas_object_show(gl);
+    elm_object_content_set(parent, glview);
+    evas_object_show(glview);
 
-    return gl;
+    return glview;
 }

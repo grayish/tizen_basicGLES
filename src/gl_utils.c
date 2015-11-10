@@ -9,6 +9,8 @@
 #include <tizen_type.h>
 #include <dlog.h>
 
+// update interval value for time calculation
+#define UPDATE_INTERVAL 1000ll
 
 void init_matrix(float* result) {
     result[0] = 1.0f;
