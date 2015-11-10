@@ -26,6 +26,7 @@ typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
 	Evas_Object *naviframe;
+	Evas_Object *glview;
 
 	Evas_Object *fps_label;
 	Ecore_Animator *ani;
@@ -40,6 +41,8 @@ typedef struct appdata {
 
 	float xangle;
 	float yangle;
+	float tic_xangle;
+	float tic_yangle;
 
 	// Locations for vertex attribute
 	unsigned int idx_a_position;
@@ -53,7 +56,8 @@ typedef struct appdata {
 	float mvp[16];
 
 	Eina_Bool mouse_down : 1;
-	Eina_Bool initialized :1;
+	Eina_Bool initialized : 1;
+	Eina_Bool reset_anim : 1;
 } appdata_s;
 
 // in gl.c
