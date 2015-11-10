@@ -239,7 +239,21 @@ static void init_shaders(Evas_Object *obj) {
 static void
 mouse_down_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
     appdata_s *ad = data;
-    ad->mouse_down = EINA_TRUE;
+    if (!ad->reset_anim) {
+        ad->mouse_down = EINA_TRUE;
+        elm_glview_changed_set(obj);
+    }
+}
+
+static float
+clamp_angle(const float target)
+{
+    if(target > 360.0f)
+        return target - 360.0f;
+    else if(target < 0.0f)
+        return target + 360.0f;
+    else
+        return target;
 }
 
 static void
@@ -247,20 +261,31 @@ mouse_move_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
     Evas_Event_Mouse_Move *ev;
     ev = (Evas_Event_Mouse_Move *) event_info;
     appdata_s *ad = data;
-    float dx = 0, dy = 0;
+    if (!ad->reset_anim) {
 
-    if (ad->mouse_down) {
-        dx = ev->cur.canvas.x - ev->prev.canvas.x;
-        dy = ev->cur.canvas.y - ev->prev.canvas.y;
-        ad->xangle += dy;
-        ad->yangle += dx;
+        float dx = 0, dy = 0;
+
+        if (ad->mouse_down) {
+            dx = ev->cur.canvas.x - ev->prev.canvas.x;
+            dy = ev->cur.canvas.y - ev->prev.canvas.y;
+            ad->xangle += dy;
+            ad->yangle += dx;
+            ad->xangle = clamp_angle(ad->xangle);
+            ad->yangle = clamp_angle(ad->yangle);
+        }
+        elm_glview_changed_set(obj);
     }
 }
 
 static void
 mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info) {
     appdata_s *ad = data;
-    ad->mouse_down = EINA_FALSE;
+    if (!ad->reset_anim) {
+
+        ad->mouse_down = EINA_FALSE;
+        elm_glview_changed_set(obj);
+    }
+
 }
 
 // GL Init function
@@ -355,23 +380,13 @@ static void del_gl(Evas_Object *glview) {
     evas_object_data_del((Evas_Object *) glview, "ad");
 }
 
-static void del_anim(void *data, Evas *evas, Evas_Object *obj, void *event_info) {
-    appdata_s *ad = data;
-    ecore_animator_del(ad->ani);
-}
-
-static Eina_Bool anim(void *data) {
-    elm_glview_changed_set(data);
-    return EINA_TRUE;
-}
-
-
 Evas_Object *
 add_glview(Evas_Object *parent, appdata_s *ad) {
     Evas_Object *gl;
 
     /* Create and initialize GLView */
     gl = elm_glview_add(parent);
+    evas_object_data_set(gl, "ad", ad);
 
     ELEMENTARY_GLVIEW_GLOBAL_USE(gl);
     evas_object_size_hint_weight_set(gl, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -414,9 +429,7 @@ add_glview(Evas_Object *parent, appdata_s *ad) {
     * NOTE: If you delete GL, this animator will keep running trying to access
     * GL so this animator needs to be deleted with ecore_animator_del().
     */
-    ad->ani = ecore_animator_add(anim, gl);
-    evas_object_data_set(gl, "ad", ad);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_DEL, del_anim, gl);
+
 
     evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_DOWN, mouse_down_cb, ad);
     evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_UP, mouse_up_cb, ad);
