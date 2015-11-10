@@ -29,9 +29,9 @@ clicked_cb(void *user_data, Evas_Object *obj, void *event_info) {
     if (!ad->reset_anim) {
         ad->reset_anim = EINA_TRUE;
 
-        // Setting animation angle for 3 seconds
-        ad->tic_xangle = (ad->xangle - 45.0f) / 180.0f;
-        ad->tic_yangle = (ad->yangle - 45.0f) / 180.0f;
+        // Setting animation angle for 0.75 seconds
+        ad->tic_xangle = (ad->xangle - 45.0f) / 45.0f;
+        ad->tic_yangle = (ad->yangle - 45.0f) / 45.0f;
 
         ad->ani = ecore_animator_add(anim, ad->glview);
         evas_object_event_callback_add(ad->glview, EVAS_CALLBACK_DEL, del_anim, ad);
