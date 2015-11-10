@@ -4,7 +4,12 @@
 
 #include "gl_texture_util.h"
 
-unsigned int read_texture(Evas_Object *parent, const char *filename) {
+#include <app.h>
+#include <Elementary_GL_Helpers.h>
+
+ELEMENTARY_GLVIEW_GLOBAL_DECLARE();
+
+unsigned int create_texture(Evas_Object *parent, const char *filename) {
 
     unsigned int gltex_object;
     int w, h;
