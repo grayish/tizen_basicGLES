@@ -95,7 +95,7 @@ create_base_gui(appdata_s *ad)
 	elm_box_pack_end(box, glview);
 
 	Evas_Object *button = elm_button_add(box);
-	evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, EVAS_HINT_FILL);
 	evas_object_size_hint_align_set(button, EVAS_HINT_FILL, 1);
 	elm_object_text_set(button, "Reset");
 	evas_object_smart_callback_add(button, "clicked", clicked_cb, ad);

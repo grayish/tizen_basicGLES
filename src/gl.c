@@ -374,8 +374,8 @@ add_glview(Evas_Object *parent, appdata_s *ad) {
     gl = elm_glview_add(parent);
 
     ELEMENTARY_GLVIEW_GLOBAL_USE(gl);
-    evas_object_size_hint_align_set(gl, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_size_hint_weight_set(gl, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(gl, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
     /* Request a surface with alpha and a depth buffer */
     elm_glview_mode_set(gl, ELM_GLVIEW_ALPHA | ELM_GLVIEW_DEPTH);
