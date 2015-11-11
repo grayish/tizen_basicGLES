@@ -112,10 +112,8 @@ create_base_gui(appdata_s *ad) {
     // Show the naviframe
     evas_object_show(ad->naviframe);
 
-    Evas_Object *table = elm_table_add(ad->naviframe);
-
     // Create the box
-    Evas_Object *box = elm_box_add(table);
+    Evas_Object *box = elm_box_add(ad->naviframe);
 
     // Set the box vertical
     elm_box_horizontal_set(box, EINA_FALSE);
@@ -138,25 +136,8 @@ create_base_gui(appdata_s *ad) {
     // Show the box
     evas_object_show(box);
 
-    Evas_Object *label_box = elm_box_add(table);
-    elm_box_horizontal_set(label_box, EINA_FALSE);
-    evas_object_size_hint_weight_set(label_box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(label_box, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_show(label_box);
-
-    ad->fps_label = elm_label_add(label_box);
-    elm_object_text_set(ad->fps_label, "<align=left color=#FFFFFF>FPS</align>");
-    evas_object_size_hint_weight_set(ad->fps_label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(ad->fps_label, 0.0, 0.0);
-    evas_object_show(ad->fps_label);
-    elm_box_pack_end(label_box, ad->fps_label);
-
-    elm_table_pack(table, box, 0, 0, 1, 1);
-    elm_table_pack(table, label_box, 0, 0, 1, 1);
-    evas_object_show(table);
-
     // Add the box in the naviframe container
-    elm_naviframe_item_push(ad->naviframe, "Basic GLES App", NULL, NULL, table, NULL);
+    elm_naviframe_item_push(ad->naviframe, "Basic GLES App", NULL, NULL, box, NULL);
 
     // Show window after base gui is set up
     evas_object_show(ad->win);

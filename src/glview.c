@@ -363,13 +363,6 @@ draw_glview(Evas_Object *glview) {
 
     glFlush();
 
-    float fps = get_fps();
-    if (fps > 0) {
-        char buff[200];
-        sprintf(buff, "<color=#FFF>Cube<br>FPS: %.2f</color>", fps);
-        elm_object_text_set(ad->fps_label, buff);
-    }
-
 }
 
 // Delete GLView callback

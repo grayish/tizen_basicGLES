@@ -28,7 +28,6 @@ typedef struct appdata {
 	Evas_Object *naviframe;
 	Evas_Object *glview;
 
-	Evas_Object *fps_label;
 	Ecore_Animator *ani;
 
 	int glview_w, glview_h;
