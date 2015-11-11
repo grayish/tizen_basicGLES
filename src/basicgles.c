@@ -74,7 +74,7 @@ create_indicator(appdata_s *ad) {
 static Evas_Object *
 add_win(const char *name) {
     Evas_Object *win;
-    win = elm_win_util_standard_add(name, "OpenGL example: Cube");
+    win = elm_win_util_standard_add(name, "OpenGL example");
 
     if (!win)
         return NULL;
