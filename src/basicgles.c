@@ -41,6 +41,9 @@ clicked_cb(void *user_data, Evas_Object *obj, void *event_info) {
         ad->tic_xangle = (ad->xangle - 45.0f) / 45.0f;
         ad->tic_yangle = (ad->yangle - 45.0f) / 45.0f;
 
+        // Add animator which calls elm_glview_changed_set() per frame
+        // This will rotate object tic_x(y)angle along x(y)-axis
+        // until object reaches the initial angle
         ad->ani = ecore_animator_add(anim_cb, ad);
         evas_object_event_callback_add(ad->glview, EVAS_CALLBACK_DEL, del_anim, ad);
     }
