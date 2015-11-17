@@ -144,7 +144,7 @@ const float cube_colors[] =
 
 /* Vertex Shader Source */
 static const char vertex_shader[] =
-        "uniform mat4 u_mvpMatrix;\n"
+        "uniform mat4 u_wvpMatrix;\n"
                 "attribute vec4 a_position;\n"
                 "attribute vec4 a_color;\n"
                 "varying vec4 v_color;\n"
@@ -152,7 +152,7 @@ static const char vertex_shader[] =
                 "void main()\n"
                 "{\n"
                 "    v_color = a_color;\n"
-                "    gl_Position = u_mvpMatrix * a_position;\n"
+                "    gl_Position = u_wvpMatrix * a_position;\n"
                 "}";
 
 /* Fragment Shader Source */
@@ -170,7 +170,7 @@ static const char fragment_shader[] =
 
 /* Vertex Shader texture Source */
 static const char vertex_tex_shader[] =
-        "uniform mat4 u_mvpMatrix;\n"
+        "uniform mat4 u_wvpMatrix;\n"
                 "attribute vec4 a_position;\n"
                 "attribute vec2 a_tex;\n"
                 "varying vec2 v_tex;\n"
@@ -178,7 +178,7 @@ static const char vertex_tex_shader[] =
                 "void main()\n"
                 "{\n"
                 "    v_tex = a_tex;\n"
-                "    gl_Position = u_mvpMatrix * a_position;\n"
+                "    gl_Position = u_wvpMatrix * a_position;\n"
                 "}";
 
 /* Fragment Shader texture Source */
@@ -193,6 +193,34 @@ static const char fragment_tex_shader[] =
                 "{\n"
                 "    gl_FragColor = texture2D(u_texSampler, v_tex);\n"
                 "}";
+
+static void
+create_vbo(appdata_s* ad) {
+	glGenBuffers(1, &ad->vbo_vertex);
+    glGenBuffers(1, &ad->vbo_color);
+    glGenBuffers(1, &ad->vbo_texture);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ad->vbo_vertex);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(ad->idx_a_position, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ad->vbo_color);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_colors), cube_colors, GL_STATIC_DRAW);
+    glVertexAttribPointer(ad->idx_a_color, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ad->vbo_texture);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texs), cube_texs, GL_STATIC_DRAW);
+    glVertexAttribPointer(ad->idx_a_tex, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+
+    glEnableVertexAttribArray(ad->idx_a_position);
+    glEnableVertexAttribArray(ad->idx_a_color);
+    glEnableVertexAttribArray(ad->idx_a_tex);
+
+    glGenBuffers(1, &ad->vbo_index);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ad->vbo_index);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
+}
+
 
 static void
 init_shader_program(appdata_s* ad) {
@@ -231,7 +259,7 @@ init_shader_program(appdata_s* ad) {
     ad->idx_a_color = glGetAttribLocation(ad->program, "a_color");
     ad->idx_a_tex = glGetAttribLocation(ad->program, "a_tex");
 
-    ad->idx_mvp = glGetUniformLocation(ad->program, "u_mvpMatrix");
+    ad->idx_wvp = glGetUniformLocation(ad->program, "u_wvpMatrix");
     ad->idx_tex = glGetUniformLocation(ad->program, "u_texSampler");
 
     glUseProgram(ad->program);
@@ -298,6 +326,7 @@ init_glview(Evas_Object *glview) {
 
     if (!ad->initialized) {
         init_shader_program(ad);
+        create_vbo(ad);
         ad->texture = create_texture(ad->win, "tizen_noalpha.png");
 
         glEnable(GL_DEPTH_TEST);
@@ -325,41 +354,34 @@ static void
 draw_glview(Evas_Object *glview) {
 
     appdata_s *ad = (appdata_s *) evas_object_data_get(glview, "ad");
-    float model[16], view[16];
+    float world[16], viewproj[16];
     float aspect;
 
     if (!ad)
         return;
 
-    init_matrix(model);
-    init_matrix(view);
+    init_matrix(world);
+    init_matrix(viewproj);
 
     aspect = (float) ad->glview_w / (float) ad->glview_h;
 
-    view_set_perspective(view, 60.0f, aspect, 1.0f, 20.0f);
+    // view matrix is the identity matrix
+    view_set_perspective(viewproj, 60.0f, aspect, 1.0f, 20.0f);
 
-    translate_xyz(model, 0.0f, 0.0f, -2.5f);
-    rotate_xyz(model, ad->xangle, ad->yangle, 0.0f);
+    translate_xyz(world, 0.0f, 0.0f, -2.5f);
+    rotate_xyz(world, ad->xangle, ad->yangle, 0.0f);
 
-    multiply_matrix(ad->mvp, view, model);
+    multiply_matrix(ad->wvp, viewproj, world);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glVertexAttribPointer(ad->idx_a_position, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), cube_vertices);
-    glVertexAttribPointer(ad->idx_a_color, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), cube_colors);
-    glVertexAttribPointer(ad->idx_a_tex, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), cube_texs);
-
-    glEnableVertexAttribArray(ad->idx_a_position);
-    glEnableVertexAttribArray(ad->idx_a_color);
-    glEnableVertexAttribArray(ad->idx_a_tex);
-
-    glUniformMatrix4fv(ad->idx_mvp, 1, GL_FALSE, ad->mvp);
+    glUniformMatrix4fv(ad->idx_wvp, 1, GL_FALSE, ad->wvp);
 
     glBindTexture(GL_TEXTURE_2D, ad->texture);
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(ad->idx_tex, 0);
 
-    glDrawElements(GL_TRIANGLES, cube_indices_count, GL_UNSIGNED_SHORT, cube_indices);
+    glDrawElements(GL_TRIANGLES, cube_indices_count, GL_UNSIGNED_SHORT, 0);
 
     glFlush();
 

@@ -38,6 +38,11 @@ typedef struct appdata {
 	unsigned int fgmt_shader;
 	unsigned int texture;
 
+	unsigned int vbo_vertex;
+	unsigned int vbo_color;
+	unsigned int vbo_texture;
+	unsigned int vbo_index;
+
 	float xangle;
 	float yangle;
 	float tic_xangle;
@@ -49,10 +54,10 @@ typedef struct appdata {
 	unsigned int idx_a_tex;
 
 	// Locations for shdaer uniforms
-	int idx_mvp;
+	int idx_wvp;
 	int idx_tex;
 
-	float mvp[16];
+	float wvp[16];
 
 	Eina_Bool mouse_down : 1;
 	Eina_Bool initialized : 1;
